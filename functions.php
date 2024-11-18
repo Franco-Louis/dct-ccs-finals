@@ -4,7 +4,7 @@ function dataBaseConnection() {
     $host = 'localhost';
     $user = 'root';
     $password = '';
-    $dbname = 'dct_ccs_finals';
+    $dbname = 'dct-ccs-finals';
 
     $conn = new mysqli($host, $user, $password, $dbname);
 
@@ -18,10 +18,6 @@ function dataBaseConnection() {
 function validateLoginCredentials($email, $password) {
     $arrErrors = [];
     
-    // Sanitize input data
-    $email = sanitizeInput($email);
-    $password = sanitizeInput($password);
-
     // Validate email
     if ($email === '') {
         $arrErrors[] = 'Email is required.';
@@ -46,5 +42,52 @@ function sanitizeInput($input) {
 function isValidEmail($email) {
     return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
 }
+
+function displayErrors($errors) {
+    $output = "<ul class='mb-0'>";
+    foreach ($errors as $error) {
+        $output .= "<li>" . htmlspecialchars($error) . "</li>";
+    }
+    $output .= "</ul>";
+    return $output;
+}
+
+function checkLoginCredentials($email, $password) {
+    // Establish database connection
+    $con = dataBaseConnection();
+
+    // Sanitize the inputs to prevent SQL injection
+    $email = $con->real_escape_string($email);
+    $password = $con->real_escape_string($password);
+
+    // Prepare the SQL query
+    $strSql = "
+        SELECT * FROM users
+        WHERE email = '$email'
+        AND password = '$password'
+    ";
+
+    // Execute the query
+    if ($rsLogin = $con->query($strSql)) {
+        // Check if the result contains any rows
+        if ($rsLogin->num_rows > 0) {
+            // Valid credentials
+            $rsLogin->free_result(); // Free result set
+            $con->close(); // Close the connection
+            return true;
+        } else {
+            // Invalid credentials
+            $rsLogin->free_result(); // Free result set
+            $con->close(); // Close the connection
+            return false;
+        }
+    } else {
+        // Query failed
+        $con->close(); // Close the connection
+        return false;
+    }
+}
+
+
 
 ?>

@@ -1,3 +1,65 @@
+<?php
+    require('functions.php');
+
+if (isset($_POST['login'])){
+   
+    $email = sanitizeInput($_POST['email']);
+    $password = sanitizeInput($_POST['password']);
+    $arrErrors = validateLoginCredentials($email, $password);
+
+    // Check login credentials
+
+    session_start(); // Ensure session is started
+
+    $errors = []; // Array to collect error messages
+    
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        // Collect and sanitize input
+        $email = filter_var(trim($_POST['email']), FILTER_SANITIZE_EMAIL); // Sanitize email
+        $password = trim($_POST['password']); // No need to sanitize password, just trim it
+    
+        // Validate input using your custom validation function
+        $errors = validateLoginCredentials($email, $password);
+    
+        // If no validation errors, proceed to check credentials
+        if (empty($errors)) {
+            // Connect to the database
+            $conn = dbConnect();
+    
+            // Prepare SQL query to prevent SQL injection
+            $stmt = $conn->prepare("SELECT email, password FROM users WHERE email = ?");
+            $stmt->bind_param("s", $email); // Bind parameters
+    
+            $stmt->execute();
+            $result = $stmt->get_result();
+    
+            if ($result->num_rows > 0) {
+                $user = $result->fetch_assoc();
+                
+                // Verify the password using password_verify
+                if (password_verify($password, $user['password'])) {
+                    // If password is correct, store session data
+                    $_SESSION['user'] = $email;
+                    header("Location: admin/dashboard.php");
+                    exit(); // Stop script execution after redirect
+                } else {
+                    // If password doesn't match
+                    $errors[] = "Invalid email or password!";
+                }
+            } else {
+                // No matching user found
+                $errors[] = "Invalid email or password!";
+            }
+    
+            // Clean up
+            $stmt->close();
+            $conn->close();
+        }
+    }
+    
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -12,6 +74,13 @@
     <div class="d-flex align-items-center justify-content-center vh-100">
         <div class="col-3">
             <!-- Server-Side Validation Messages should be placed here -->
+            <?php 
+                if (!empty($errors)) {
+                    echo "<div class='alert alert-danger'>";
+                    echo displayErrors($errors);
+                    echo "</div>";
+                }
+                ?>
             <div class="card">
                 <div class="card-body">
                     <h1 class="h3 mb-4 fw-normal">Login</h1>
