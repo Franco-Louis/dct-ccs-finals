@@ -1,3 +1,24 @@
+<?php
+    require('functions.php');
+
+if (isset($_POST['login'])){
+   
+    $email = sanitizeInput($_POST['email']);
+    $password = sanitizeInput($_POST['password']);
+    $errors = validateLoginCredentials($email, $password);
+    // Check login credentials
+
+    session_start(); // Ensure session is started
+
+    if(checkLoginCredentials($email, $password)) {
+        $_SESSION['email'] = $email;
+        header("location: admin/dashboard.php");
+    } else if (empty($errors)) {
+        $errors[] = 'Invalid email or password';
+    }
+}    
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -12,6 +33,13 @@
     <div class="d-flex align-items-center justify-content-center vh-100">
         <div class="col-3">
             <!-- Server-Side Validation Messages should be placed here -->
+            <?php 
+                if (!empty($errors)) {
+                    echo "<div class='alert alert-danger'>";
+                    echo displayErrors($errors);
+                    echo "</div>";
+                }
+                ?>
             <div class="card">
                 <div class="card-body">
                     <h1 class="h3 mb-4 fw-normal">Login</h1>
