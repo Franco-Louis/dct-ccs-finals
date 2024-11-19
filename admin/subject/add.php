@@ -2,6 +2,23 @@
 session_start();
 ob_start();
 
+// Database connection
+$host = 'localhost';
+$dbname = 'dct-ccs-finals';
+$username = 'root';  // Your MySQL username (default is 'root' for localhost)
+$password = '';  // Your MySQL password (default is empty for localhost)
+
+try {
+    // Create a PDO instance
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+    // Set the PDO error mode to exception
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    // If the connection fails, show the error message
+    echo "Connection failed: " . $e->getMessage();
+    exit();
+}
+
 // Page-specific settings
 $title = 'Subject';
 $_SESSION['current_page'] = $_SERVER['REQUEST_URI'];
@@ -16,10 +33,8 @@ $studentPath = "../student/register.php";
 require '../partials/header.php'; 
 require '../partials/side-bar.php'; 
 
-// Initialize subjects array in session if not already done
-if (!isset($_SESSION['subjects'])) {
-    $_SESSION['subjects'] = [];
-}
+// Initialize error array
+$errors = [];
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -30,23 +45,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($subject_code) || empty($subject_name)) {
         $errors[] = "Both Subject Code and Subject Name are required.";
     } else {
-        // Check for duplicates
-        $duplicate = false;
-        foreach ($_SESSION['subjects'] as $subject) {
-            if ($subject['subject_code'] == $subject_code) {
-                $duplicate = true;
-                break;
-            }
-        }
+        // Check for duplicates in the database
+        $stmt = $pdo->prepare("SELECT * FROM subjects WHERE subject_code = :subject_code");
+        $stmt->execute(['subject_code' => $subject_code]);
+        $duplicate = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($duplicate) {
             $errors[] = "Subject with the same code already exists.";
         } else {
-            // Add to session
-            $_SESSION['subjects'][] = [
-                'subject_code' => $subject_code,
-                'subject_name' => $subject_name,
-            ];
+            // Insert into the database
+            $stmt = $pdo->prepare("INSERT INTO subjects (subject_code, subject_name) VALUES (:subject_code, :subject_name)");
+            $stmt->execute(['subject_code' => $subject_code, 'subject_name' => $subject_name]);
 
             // Redirect to avoid re-submission
             header("Location: add.php");
@@ -54,6 +63,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
+// Fetch all subjects from the database
+$stmt = $pdo->query("SELECT * FROM subjects");
+$subjects = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-5">
@@ -103,17 +116,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if (!empty($_SESSION['subjects'])): ?>
-                        <?php foreach ($_SESSION['subjects'] as $index => $subject): ?>
+                    <?php if (!empty($subjects)): ?>
+                        <?php foreach ($subjects as $subject): ?>
                             <tr>
                                 <td><?php echo htmlspecialchars($subject['subject_code']); ?></td>
                                 <td><?php echo htmlspecialchars($subject['subject_name']); ?></td>
                                 <td>
                                     <!-- Edit Button -->
-                                    <a href="edit.php?index=<?php echo $index; ?>" class="btn btn-info btn-sm">Edit</a>
+                                    <a href="edit.php?id=<?php echo $subject['id']; ?>" class="btn btn-info btn-sm">Edit</a>
 
                                     <!-- Delete Button -->
-                                    <a href="delete.php?index=<?php echo $index; ?>" class="btn btn-danger btn-sm">Delete</a>
+                                    <a href="delete.php?id=<?php echo $subject['id']; ?>" class="btn btn-danger btn-sm">Delete</a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
