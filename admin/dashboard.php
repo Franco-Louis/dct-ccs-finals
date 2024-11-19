@@ -1,6 +1,14 @@
-<?php
-    require 'partials/header.php'; // Include header here
-    require 'partials/side-bar.php';
+<?php       
+        session_start();
+        $title = 'Dashboard';
+        
+        $dashboardPath = "dashboard.php";
+        $logoutPath = "logout.php";
+        $subjectPath = "subject/add.php";
+        $studentPath = "student/register.php";
+
+        require 'partials/header.php'; 
+        require 'partials/side-bar.php';       
 ?>
 <!-- Template Files here -->
 <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-5">    
