@@ -2,5 +2,5 @@
     require '../functions.php';
     session_start();
     session_destroy();
-    header("Location: " . getBaseURL());
+    header("Location: ../index.php");
 ?>
