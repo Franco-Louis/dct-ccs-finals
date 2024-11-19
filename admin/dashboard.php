@@ -41,4 +41,5 @@
         </div>
     </div>    
 </main>
+<?php require 'partials/footer.php'; ?>
 <!-- Template Files here -->
