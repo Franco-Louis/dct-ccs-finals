@@ -1,16 +1,16 @@
 <?php
-    require('functions.php');
+require('functions.php');
 
-if (isset($_POST['login'])){
+if (isset($_POST['login'])) {
    
     $email = sanitizeInput($_POST['email']);
     $password = sanitizeInput($_POST['password']);
     $errors = validateLoginCredentials($email, $password);
+    
     // Check login credentials
-
     session_start(); // Ensure session is started
 
-    if(checkLoginCredentials($email, $password)) {
+    if (checkLoginCredentials($email, $password)) {
         $_SESSION['email'] = $email;
         header("location: admin/dashboard.php");
     } else if (empty($errors)) {
@@ -26,7 +26,7 @@ if (isset($_POST['login'])){
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <title></title>
+    <title>Login</title>
 </head>
 
 <body class="bg-secondary-subtle">
@@ -34,12 +34,18 @@ if (isset($_POST['login'])){
         <div class="col-3">
             <!-- Server-Side Validation Messages should be placed here -->
             <?php 
-                if (!empty($errors)) {
-                    echo "<div class='alert alert-danger'>";
-                    echo displayErrors($errors);
-                    echo "</div>";
+            if (!empty($errors)) {
+                echo "<div class='alert alert-danger'>";
+                echo "<h4>System Errors</h4>";  // Display 'System Errors' title
+                echo "<ul>";
+                foreach ($errors as $error) {
+                    echo "<li>$error</li>";  // Display each error as a list item
                 }
-                ?>
+                echo "</ul>";
+                echo "</div>";
+            }
+            ?>
+            
             <div class="card">
                 <div class="card-body">
                     <h1 class="h3 mb-4 fw-normal">Login</h1>
