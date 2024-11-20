@@ -1,11 +1,13 @@
 <?php
-ob_start();
 session_start();
 $title = 'Edit Subject';
 
 require '../partials/header.php';
 require '../../functions.php';
 require '../partials/side-bar.php';
+
+// Initialize error array
+$errors = [];
 
 // Check for subject code in the POST request
 if (isset($_POST['subject_code'])) {
@@ -36,21 +38,27 @@ if (isset($_POST['subject_code'])) {
     exit();
 }
 
+// Handle form submission for updating subject
 if (isset($_POST['btnUpdateSubject'])) {
     // Sanitize subject name input
     $subject_name = sanitizeInput($_POST['subject_name']);
 
-    // Update the subject name in the database
-    $con = dataBaseConnection();
-    $stmt = $con->prepare("UPDATE subjects SET subject_name = ? WHERE subject_code = ?");
-    $stmt->bind_param("ss", $subject_name, $subject_code);
-    $stmt->execute();
-    $stmt->close();
-    mysqli_close($con);
+    // Validate if subject name is empty
+    if (empty($subject_name)) {
+        $errors[] = "Subject Name cannot be empty.";
+    } else {
+        // Update the subject name in the database
+        $con = dataBaseConnection();
+        $stmt = $con->prepare("UPDATE subjects SET subject_name = ? WHERE subject_code = ?");
+        $stmt->bind_param("ss", $subject_name, $subject_code);
+        $stmt->execute();
+        $stmt->close();
+        mysqli_close($con);
 
-    // Redirect to add page after successful update
-    header("Location: add.php");
-    exit();
+        // Redirect to add page after successful update
+        header("Location: add.php");
+        exit();
+    }
 }
 ?>
 
@@ -66,6 +74,13 @@ if (isset($_POST['btnUpdateSubject'])) {
         </nav>            
     </div>
 
+    <!-- Display errors using the centralized error handler -->
+    <?php 
+    if (!empty($errors)) {
+        echo displayErrors($errors);
+    }
+    ?>
+
     <!-- Edit Subject Form -->
     <form method="POST" action="" class="border border-secondary-1 p-5 mb-4">
         <!-- Subject Code -->
@@ -78,17 +93,13 @@ if (isset($_POST['btnUpdateSubject'])) {
         <!-- Subject Name -->
         <div class="form-floating mb-3">
             <input type="text" class="form-control bg-light" id="subject_name" name="subject_name" 
-                   placeholder="Subject Name" value="<?= isset($_POST['subject_name']) ? sanitizeInput($_POST['subject_name']) : htmlspecialchars($subject['subject_name']); ?>">
+                   placeholder="Subject Name" value="<?= isset($subject['subject_name']) ? htmlspecialchars($subject['subject_name']) : ''; ?>">
             <label for="subject_name">Subject Name</label>
         </div>
 
-        <!-- Action Buttons -->
-        <div>
-            <button name="btnUpdateSubject" type="submit" class="btn btn-primary w-100">Update Subject</button>
-        </div>
+        <!-- Update Button -->
+        <button type="submit" name="btnUpdateSubject" class="btn btn-primary w-100">Update Subject</button>
     </form>
 </div>
 
-<?php
-include '../partials/footer.php';
-?>
+<?php include '../partials/footer.php'; ?>

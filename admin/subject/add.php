@@ -72,11 +72,7 @@ $con->close();
     <?php 
     // Display errors, if any
     if (!empty($errors)) {
-        echo '<div class="alert alert-danger">';
-        foreach ($errors as $error) {
-            echo "<p>$error</p>";
-        }
-        echo '</div>';
+        echo displayErrors($errors);  // Use the displayErrors function here
     }
     ?>
 
@@ -121,7 +117,7 @@ $con->close();
                                 <td><?php echo htmlspecialchars($subject['subject_code']); ?></td>
                                 <td><?php echo htmlspecialchars($subject['subject_name']); ?></td>
                                 <td>
-                                    <!-- Edit Button (Sends Subject Code via POST to edit.php) -->
+                                    <!-- Edit Button (Sends Subject ID via POST to edit.php) -->
                                     <form method="POST" action="edit.php" class="d-inline">
                                         <input type="hidden" name="subject_code" value="<?php echo $subject['subject_code']; ?>">
                                         <button type="submit" class="btn btn-info btn-sm">Edit</button>
