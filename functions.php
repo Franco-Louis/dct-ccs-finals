@@ -43,12 +43,19 @@ function isValidEmail($email) {
     return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
 }
 
+// Function to display error messages
 function displayErrors($errors) {
-    $output = "<ul class='mb-0'>";
+    $output = "<div class='alert alert-danger'>";
+    $output .= "<strong>System Errors:</strong>";
+    $output .= "<ul class='mb-0'>";
+    
     foreach ($errors as $error) {
         $output .= "<li>" . htmlspecialchars($error) . "</li>";
     }
+
     $output .= "</ul>";
+    $output .= "</div>";
+
     return $output;
 }
 
