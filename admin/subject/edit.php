@@ -43,6 +43,3 @@ require '../../functions.php';
 <?php
     include '../partials/footer.php';
 ?>
-
-</body>
-</html>
