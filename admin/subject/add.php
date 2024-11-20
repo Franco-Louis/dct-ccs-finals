@@ -21,7 +21,7 @@ require '../partials/side-bar.php';
 // Initialize error array
 $errors = [];
 
-// Handle form submission
+// Handle form submission for adding new subject
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Sanitize inputs using sanitizeInput function
     $subject_code = sanitizeInput($_POST['subject_code']);
@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Use your custom database connection function to fetch all subjects from the database
+// Fetch all subjects from the database
 $con = dataBaseConnection();
 $stmt = $con->prepare("SELECT * FROM subjects");
 $stmt->execute();
@@ -106,14 +106,14 @@ $con->close();
             <!-- Subject Code -->
             <div class="form-floating mb-3">
                 <input type="number" class="form-control bg-light" id="subject_code" name="subject_code" 
-                       placeholder="Subject Code" value="">
+                       placeholder="Subject Code" value=""/>
                 <label for="subject_code">Subject Code</label>
             </div>
 
             <!-- Subject Name -->
             <div class="form-floating mb-3">
                 <input type="text" class="form-control bg-light" id="subject_name" name="subject_name" 
-                       placeholder="Subject Name" value="">
+                       placeholder="Subject Name" value=""/>
                 <label for="subject_name">Subject Name</label>
             </div>
 
@@ -145,8 +145,12 @@ $con->close();
                                         <button type="submit" class="btn btn-info btn-sm">Edit</button>
                                     </form>
 
-                                    <!-- Delete Button (Leaves unchanged) -->
-                                    <a href="delete.php?id=<?php echo $subject['id']; ?>" class="btn btn-danger btn-sm">Delete</a>
+                                    <!-- Delete Button -->
+                                    <form method="POST" action="delete.php" class="d-inline">
+                                        <input type="hidden" name="subject_code" value="<?php echo $subject['subject_code'] ?>">
+                                        <button type="submit" name="btnDelete" class="btn btn-danger btn-sm">Delete</button>
+                                    </form>
+
                                 </td>
                             </tr>
                         <?php endforeach; ?>
