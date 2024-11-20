@@ -63,7 +63,7 @@ if (isset($_POST['btnConfirmDelete'])) {
     $con->close(); // Close the database connection
 } elseif (isset($_POST['btnCancel'])) {
     // Redirect to add.php if the user cancels
-    redirectTo('add.php');
+    header("Location: add.php");
 }
 
 ?>
