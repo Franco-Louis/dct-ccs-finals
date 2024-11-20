@@ -122,10 +122,13 @@ $subjects = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <td><?php echo htmlspecialchars($subject['subject_code']); ?></td>
                                 <td><?php echo htmlspecialchars($subject['subject_name']); ?></td>
                                 <td>
-                                    <!-- Edit Button -->
-                                    <a href="edit.php?id=<?php echo $subject['id']; ?>" class="btn btn-info btn-sm">Edit</a>
+                                    <!-- Edit Button (Sends Subject ID via POST to edit.php) -->
+                                    <form method="POST" action="edit.php" class="d-inline">
+                                        <input type="hidden" name="id" value="<?php echo $subject['id']; ?>">
+                                        <button type="submit" class="btn btn-info btn-sm">Edit</button>
+                                    </form>
 
-                                    <!-- Delete Button -->
+                                    <!-- Delete Button (Leaves unchanged) -->
                                     <a href="delete.php?id=<?php echo $subject['id']; ?>" class="btn btn-danger btn-sm">Delete</a>
                                 </td>
                             </tr>
