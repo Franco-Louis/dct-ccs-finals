@@ -95,6 +95,136 @@ function checkLoginCredentials($email, $password) {
     }
 }
 
+function validateStudentData($student_id, $first_name, $last_name) {
+    $arrErrors = [];
+
+
+    // Validate Student ID
+    if (empty($student_id)) {
+        $arrErrors[] = "Student ID is required.";
+    }
+
+
+    // Validate First Name
+    if (empty($first_name)) {
+        $arrErrors[] = "First name is required.";
+    }
+
+
+    // Validate Last Name
+    if (empty($last_name)) {
+        $arrErrors[] = "Last name is required.";
+    }
+
+
+    return $arrErrors;
+}
+
+
+function checkDuplicateStudentData($student_id) {
+    $arrErrors = [];
+    $con = dataBaseConnection();
+
+
+    // Check if the student ID already exists in the database
+    $stmt = $con->prepare("SELECT * FROM students WHERE student_id = ?");
+    $stmt->bind_param("s", $student_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+
+    if ($result->num_rows > 0) {
+        $arrErrors[] = "Duplicate Student ID.";
+    }
+
+
+    $stmt->close();
+    mysqli_close($con);
+
+
+    return $arrErrors;
+}
+
+
+function getStudentData($student_id) {
+    $con = dataBaseConnection();
+    $stmt = $con->prepare("SELECT * FROM students WHERE student_id = ?");
+    $stmt->bind_param("i", $student_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $student_data = $result->fetch_assoc();
+    $stmt->close();
+    mysqli_close($con);
+
+
+    return $student_data;
+}
+
+
+function getAllStudents() {
+    $con = dataBaseConnection();
+    $stmt = $con->prepare("SELECT * FROM students ORDER BY student_id ASC");
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $students = $result->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+    mysqli_close($con);
+
+    return $students;
+}
+
+
+function getStudentCount() {
+    $con = dataBaseConnection();
+    $stmt = $con->prepare("SELECT COUNT(*) AS student_count FROM students");
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $data = $result->fetch_assoc();
+    $stmt->close();
+    mysqli_close($con);
+    
+    return $data['student_count'];
+}
+
+
+function registerStudent($student_id, $first_name, $last_name) {
+    $con = dataBaseConnection();
+    $stmt = $con->prepare("INSERT INTO students (student_id, first_name, last_name) VALUES (?, ?, ?)");
+    $stmt->bind_param("sss", $student_id, $first_name, $last_name);
+    $stmt->execute();
+    $stmt->close();
+    mysqli_close($con);
+}
+
+
+function updateStudent($student_id, $first_name, $last_name) {
+    $con = dataBaseConnection();
+    $stmt = $con->prepare("UPDATE students SET first_name = ?, last_name = ? WHERE student_id = ?");
+    $stmt->bind_param("sss", $first_name, $last_name, $student_id);
+    $stmt->execute();
+    $stmt->close();
+    mysqli_close($con);
+}    
+
+
+function deleteStudentAndSubjects($student_id) {
+    $con = dataBaseConnection();
+
+
+    $stmt = $con->prepare("DELETE FROM students_subjects WHERE student_id = ?");
+    $stmt->bind_param("i", $student_id);
+    $stmt->execute();
+    $stmt->close();
+
+
+    $stmt = $con->prepare("DELETE FROM students WHERE student_id = ?");
+    $stmt->bind_param("i", $student_id);
+    $stmt->execute();
+    $stmt->close();
+
+
+    mysqli_close($con);
+}
 
 
 ?>
