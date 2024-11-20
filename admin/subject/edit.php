@@ -7,58 +7,50 @@ require '../partials/header.php';
 require '../../functions.php';
 require '../partials/side-bar.php';
 
-$dashboardPath = "../dashboard.php";
-$logoutPath = "../logout.php";
-$subjectPath = "add.php";
-$studentPath = "../student/register.php";
-
-$subject = null;
-
-// Check if the subject_code is set in the POST request
+// Check for subject code in the POST request
 if (isset($_POST['subject_code'])) {
+    // Sanitize subject code input
     $subject_code = sanitizeInput($_POST['subject_code']);
-
-    // Fetch subject by subject_code from the database
+    
+    // Establish database connection
     $con = dataBaseConnection();
+
+    // Prepare the SQL query to fetch subject by code
     $stmt = $con->prepare("SELECT * FROM subjects WHERE subject_code = ?");
     $stmt->bind_param("s", $subject_code);
     $stmt->execute();
     $result = $stmt->get_result();
-    $subject = $result->fetch_assoc();
-    $stmt->close();
-    mysqli_close($con);
 
-    if (!$subject) {
+    // If no subject is found, redirect to add page
+    if ($result->num_rows === 0) {
         header("Location: add.php");
         exit();
     }
+
+    // Fetch the subject data
+    $subject = $result->fetch_assoc();
+    $stmt->close();
+    mysqli_close($con);
 } else {
     header("Location: add.php");
     exit();
 }
 
 if (isset($_POST['btnUpdateSubject'])) {
+    // Sanitize subject name input
     $subject_name = sanitizeInput($_POST['subject_name']);
-    $arrErrors = [];
 
-    // Validate Subject Name
-    if (empty($subject_name)) {
-        $arrErrors[] = "Subject name is required.";
-    }
+    // Update the subject name in the database
+    $con = dataBaseConnection();
+    $stmt = $con->prepare("UPDATE subjects SET subject_name = ? WHERE subject_code = ?");
+    $stmt->bind_param("ss", $subject_name, $subject_code);
+    $stmt->execute();
+    $stmt->close();
+    mysqli_close($con);
 
-    // If no errors, update the subject
-    if (empty($arrErrors)) {
-        $con = dataBaseConnection();
-        $stmt = $con->prepare("UPDATE subjects SET subject_name = ? WHERE subject_code = ?");
-        $stmt->bind_param("ss", $subject_name, $subject_code);
-        $stmt->execute();
-        $stmt->close();
-        mysqli_close($con);
-
-        // After successful update, redirect to add page
-        header("Location: add.php");
-        exit();
-    }
+    // Redirect to add page after successful update
+    header("Location: add.php");
+    exit();
 }
 ?>
 
@@ -78,13 +70,15 @@ if (isset($_POST['btnUpdateSubject'])) {
     <form method="POST" action="" class="border border-secondary-1 p-5 mb-4">
         <!-- Subject Code -->
         <div class="form-floating mb-3">
-            <input type="number" class="form-control bg-light" id="txtSubjectCode" name="subject_code" value="<?= htmlspecialchars($subject['subject_code']); ?>" readonly>
-            <label for="txtSubjectCode">Subject Code</label>
+            <input type="number" class="form-control bg-light" id="subject_code" name="subject_code" 
+                   placeholder="Subject Code" value="<?= htmlspecialchars($subject['subject_code']); ?>" readonly>
+            <label for="subject_code">Subject Code</label>
         </div>
-
+        
         <!-- Subject Name -->
         <div class="form-floating mb-3">
-            <input type="text" class="form-control bg-light" id="subject_name" name="subject_name" placeholder="Enter Subject Name" value="<?= isset($_POST['subject_name']) ? htmlspecialchars($_POST['subject_name']) : (isset($subject['subject_name']) ? htmlspecialchars($subject['subject_name']) : ''); ?>">
+            <input type="text" class="form-control bg-light" id="subject_name" name="subject_name" 
+                   placeholder="Subject Name" value="<?= isset($_POST['subject_name']) ? sanitizeInput($_POST['subject_name']) : htmlspecialchars($subject['subject_name']); ?>">
             <label for="subject_name">Subject Name</label>
         </div>
 
@@ -96,6 +90,5 @@ if (isset($_POST['btnUpdateSubject'])) {
 </div>
 
 <?php
-// Include footer
 include '../partials/footer.php';
 ?>

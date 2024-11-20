@@ -8,7 +8,6 @@ require_once '../../functions.php'; // Adjust the path to your functions file as
 // Page-specific settings
 $title = 'Add Subject';
 
-
 // Define paths
 $dashboardPath = "../dashboard.php";
 $logoutPath = "../logout.php";
@@ -122,9 +121,9 @@ $con->close();
                                 <td><?php echo htmlspecialchars($subject['subject_code']); ?></td>
                                 <td><?php echo htmlspecialchars($subject['subject_name']); ?></td>
                                 <td>
-                                    <!-- Edit Button (Sends Subject ID via POST to edit.php) -->
+                                    <!-- Edit Button (Sends Subject Code via POST to edit.php) -->
                                     <form method="POST" action="edit.php" class="d-inline">
-                                        <input type="hidden" name="id" value="<?php echo $subject['subject_code']; ?>">
+                                        <input type="hidden" name="subject_code" value="<?php echo $subject['subject_code']; ?>">
                                         <button type="submit" class="btn btn-info btn-sm">Edit</button>
                                     </form>
 
