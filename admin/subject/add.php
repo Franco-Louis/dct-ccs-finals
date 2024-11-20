@@ -28,9 +28,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $subject_name = sanitizeInput($_POST['subject_name']);
     
     // Validate input
-    if (empty($subject_code) || empty($subject_name)) {
-        $errors[] = "Both Subject Code and Subject Name are required.";
-    } else {
+    if (empty($subject_code)) {
+        $errors[] = "Subject Code is required.";
+    }
+
+    if (empty($subject_name)) {
+        $errors[] = "Subject Name is required.";
+    }
+
+    if (empty($errors)) {
         // Use your custom database connection function
         $con = dataBaseConnection();
 
@@ -41,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $result = $stmt->get_result();
         
         if ($result->num_rows > 0) {
-            $errors[] = "Subject with the same code already exists.";
+            $errors[] = "Subject Code already exists.";
         } else {
             // Insert into the database
             $stmt = $con->prepare("INSERT INTO subjects (subject_code, subject_name) VALUES (?, ?)");
@@ -72,14 +78,30 @@ $con->close();
     <?php 
     // Display errors, if any
     if (!empty($errors)) {
-        echo displayErrors($errors);  // Use the displayErrors function here
+        echo '<div class="alert alert-danger">';
+        echo '<h4>System Errors</h4>';  // Display 'System Errors' header
+        echo '<ul>';
+        foreach ($errors as $error) {
+            echo "<li>$error</li>";  // Display each error as a list item
+        }
+        echo '</ul>';
+        echo '</div>';
     }
     ?>
 
     <h1 class="h2">Add a New Subject</h1>
 
+    <div class="mt-4 w-100">         
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="../dashboard.php" class="text-decoration-none">Dashboard</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Add Subject</li>
+            </ol>
+        </nav>            
+    </div>
+
     <!-- Subject Form -->
-    <div class="row mt-5">
+    <div class="row mt-3">
         <form method="POST" action="" class="border border-secondary-1 p-5 mb-4">
             <!-- Subject Code -->
             <div class="form-floating mb-3">
@@ -117,7 +139,7 @@ $con->close();
                                 <td><?php echo htmlspecialchars($subject['subject_code']); ?></td>
                                 <td><?php echo htmlspecialchars($subject['subject_name']); ?></td>
                                 <td>
-                                    <!-- Edit Button (Sends Subject ID via POST to edit.php) -->
+                                    <!-- Edit Button (Sends Subject Code via POST to edit.php) -->
                                     <form method="POST" action="edit.php" class="d-inline">
                                         <input type="hidden" name="subject_code" value="<?php echo $subject['subject_code']; ?>">
                                         <button type="submit" class="btn btn-info btn-sm">Edit</button>
