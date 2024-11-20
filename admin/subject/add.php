@@ -2,26 +2,12 @@
 session_start();
 ob_start();
 
-// Database connection
-$host = 'localhost';
-$dbname = 'dct-ccs-finals';
-$username = 'root';  // Your MySQL username (default is 'root' for localhost)
-$password = '';  // Your MySQL password (default is empty for localhost)
-
-try {
-    // Create a PDO instance
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    // Set the PDO error mode to exception
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    // If the connection fails, show the error message
-    echo "Connection failed: " . $e->getMessage();
-    exit();
-}
+// Include the database connection function and sanitizeInput
+require_once '../../functions.php'; // Adjust the path to your functions file as needed
 
 // Page-specific settings
-$title = 'Subject';
-$_SESSION['current_page'] = $_SERVER['REQUEST_URI'];
+$title = 'Add Subject';
+
 
 // Define paths
 $dashboardPath = "../dashboard.php";
@@ -38,35 +24,49 @@ $errors = [];
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $subject_code = trim($_POST['subject_code']);
-    $subject_name = trim($_POST['subject_name']);
+    // Sanitize inputs using sanitizeInput function
+    $subject_code = sanitizeInput($_POST['subject_code']);
+    $subject_name = sanitizeInput($_POST['subject_name']);
     
     // Validate input
     if (empty($subject_code) || empty($subject_name)) {
         $errors[] = "Both Subject Code and Subject Name are required.";
     } else {
-        // Check for duplicates in the database
-        $stmt = $pdo->prepare("SELECT * FROM subjects WHERE subject_code = :subject_code");
-        $stmt->execute(['subject_code' => $subject_code]);
-        $duplicate = $stmt->fetch(PDO::FETCH_ASSOC);
+        // Use your custom database connection function
+        $con = dataBaseConnection();
 
-        if ($duplicate) {
+        // Check for duplicates in the database
+        $stmt = $con->prepare("SELECT * FROM subjects WHERE subject_code = ?");
+        $stmt->bind_param("s", $subject_code);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows > 0) {
             $errors[] = "Subject with the same code already exists.";
         } else {
             // Insert into the database
-            $stmt = $pdo->prepare("INSERT INTO subjects (subject_code, subject_name) VALUES (:subject_code, :subject_name)");
-            $stmt->execute(['subject_code' => $subject_code, 'subject_name' => $subject_name]);
+            $stmt = $con->prepare("INSERT INTO subjects (subject_code, subject_name) VALUES (?, ?)");
+            $stmt->bind_param("ss", $subject_code, $subject_name);
+            $stmt->execute();
 
             // Redirect to avoid re-submission
             header("Location: add.php");
             exit();
         }
+
+        $stmt->close();
+        $con->close();
     }
 }
 
-// Fetch all subjects from the database
-$stmt = $pdo->query("SELECT * FROM subjects");
-$subjects = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Use your custom database connection function to fetch all subjects from the database
+$con = dataBaseConnection();
+$stmt = $con->prepare("SELECT * FROM subjects");
+$stmt->execute();
+$result = $stmt->get_result();
+$subjects = $result->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
+$con->close();
 ?>
 
 <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-5">
@@ -124,7 +124,7 @@ $subjects = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <td>
                                     <!-- Edit Button (Sends Subject ID via POST to edit.php) -->
                                     <form method="POST" action="edit.php" class="d-inline">
-                                        <input type="hidden" name="id" value="<?php echo $subject['id']; ?>">
+                                        <input type="hidden" name="id" value="<?php echo $subject['subject_code']; ?>">
                                         <button type="submit" class="btn btn-info btn-sm">Edit</button>
                                     </form>
 
