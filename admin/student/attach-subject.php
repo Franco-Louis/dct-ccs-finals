@@ -113,7 +113,7 @@
                                     <form method="POST" action="dettach-subject.php" class="d-inline">
                                         <input type="hidden" name="student_id" value="<?= sanitizeInput($student_id); ?>">
                                         <input type="hidden" name="subject_id" value="<?= sanitizeInput($subject['subject_code']); ?>">
-                                        <button type="submit" name="btnDettach" class="btn btn-danger btn-sm">Detach Subject</button>
+                                        <button type="submit" name="btnDettach" class="btn btn-danger btn-sm">Dettach Subject</button>
                                     </form>
                                     <form method="POST" action="assign-grade.php" class="d-inline">
                                         <input type="hidden" name="student_id" value="<?= sanitizeInput($student_id); ?>">

@@ -330,7 +330,6 @@ function getStudentCount() {
     return $data['student_count'];
 }
 
-
 function registerStudent($student_id, $first_name, $last_name) {
     $con = dataBaseConnection();
     $stmt = $con->prepare("INSERT INTO students (student_id, first_name, last_name) VALUES (?, ?, ?)");
@@ -382,17 +381,17 @@ function deleteStudentAndSubjects($student_id) {
         $stmt->execute();
         $result = $stmt->get_result();
     
-        if ($result->num_rows > 0) {
-            $data = $result->fetch_assoc();
-            $stmt->close();
-            mysqli_close($con);
-            return $data;
-        }
-    
+    if ($result->num_rows > 0) {
+        $data = $result->fetch_assoc();
         $stmt->close();
         mysqli_close($con);
-        return null;
-    }    
+        return $data;
+    }
+    
+    $stmt->close();
+    mysqli_close($con);
+    return null;
+}    
 
     function getAttachedSubjects($student_id) {
         $attachedSubjects = [];
@@ -431,6 +430,18 @@ function deleteStudentAndSubjects($student_id) {
         return $availableSubjects;
     }
 
+    function detachSubjectFromStudent($student_id, $subject_id) {
+        $con = databaseConnection();
+        $stmt = $con->prepare("DELETE FROM students_subjects WHERE student_id = ? AND subject_id = ?");
+        $stmt->bind_param("ii", $student_id, $subject_id);
+        $stmt->execute();
+        $stmt->close();
+        mysqli_close($con);
+
+    }
+
+
+
     function attachSubjectsToStudent($student_id, $subject_codes) {
         $con = databaseConnection();
         foreach ($subject_codes as $subject_code) {
@@ -451,16 +462,7 @@ function deleteStudentAndSubjects($student_id) {
         mysqli_close($con);
     }
 
-    function detachSubjectFromStudent($student_id, $subject_id) {
-        $con = databaseConnection();
-        $stmt = $con->prepare("DELETE FROM students_subjects WHERE student_id = ? AND subject_id = ?");
-        $stmt->bind_param("ii", $student_id, $subject_id);
-        $stmt->execute();
-        $stmt->close();
-        mysqli_close($con);
-
-    mysqli_close($con);
-    }
+    
 
 
 ?>
