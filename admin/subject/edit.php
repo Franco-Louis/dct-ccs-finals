@@ -2,11 +2,12 @@
 ob_start();
 session_start();
 $title = 'Edit Subject';
+$_SESSION['current_page'] = $_SERVER['REQUEST_URI'];
 
 require '../partials/header.php';
 require '../../functions.php';
 require '../partials/side-bar.php';
-
+guard();
 // Initialize error array
 $errors = [];
 
