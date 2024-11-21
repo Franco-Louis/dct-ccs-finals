@@ -249,18 +249,6 @@ function getSubjectByCode($subject_code) {
     return $subject; 
 }    
 
-function getSubjectCount() {
-    $con = dataBaseConnection();
-    $stmt = $con->prepare("SELECT COUNT(*) AS subject_count FROM subjects");
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $data = $result->fetch_assoc();
-    $stmt->close();
-    mysqli_close($con);
-    
-    return $data['subject_count'];
-}
-
 function addSubject($subject_code, $subject_name) {
     $con = dataBaseConnection();
     $stmt = $con->prepare("INSERT INTO subjects (subject_code, subject_name) VALUES (?, ?)");
@@ -293,18 +281,6 @@ function deleteSubjectByCode($subject_code) {
     $stmt->close();
 
     mysqli_close($con);
-}
-
-function getStudentCount() {
-    $con = dataBaseConnection();
-    $stmt = $con->prepare("SELECT COUNT(*) AS student_count FROM students");
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $data = $result->fetch_assoc();
-    $stmt->close();
-    mysqli_close($con);
-    
-    return $data['student_count'];
 }
 
 function validateGrade($grade) {
