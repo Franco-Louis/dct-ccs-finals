@@ -1,6 +1,8 @@
 <?php
     session_start();
+    ob_start();
     $title = 'Dashboard';
+    $_SESSION['current_page'] = $_SERVER['REQUEST_URI'];
 
     // Define paths
     $dashboardPath = "dashboard.php";
@@ -12,6 +14,7 @@
     require 'partials/header.php';
     require 'partials/side-bar.php';
     require '../functions.php';
+    guard();
 
     // Function to get the count of subjects
     function getSubjectCount($conn) {
@@ -78,7 +81,7 @@
         <div class="col-12 col-xl-3">
             <div class="card border-primary mb-3">
                 <div class="card-header bg-primary text-white border-primary">Number of Students:</div>
-                <div class="card-body text-success">
+                <div class="card-body text-primary">
                     <h5 class="card-title"><?= $studentCount; ?></h5>
                 </div>
             </div>

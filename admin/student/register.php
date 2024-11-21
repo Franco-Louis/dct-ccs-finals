@@ -2,10 +2,12 @@
     ob_start();
     session_start();
     $title = 'Register Student';
+    $_SESSION['current_page'] = $_SERVER['REQUEST_URI'];
        
     // Include the required functions
     require '../../functions.php';
-
+    guard();
+    
     // Define paths for navigation links
     $dashboardPath = "../dashboard.php";
     $logoutPath = "../logout.php";

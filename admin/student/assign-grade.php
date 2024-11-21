@@ -2,8 +2,10 @@
     ob_start();
     session_start();
     $title = 'Assign Grade to Subject';
-
+    $_SESSION['current_page'] = $_SERVER['REQUEST_URI'];
+   
     require '../../functions.php';
+    guard();
     
     // Paths
     $dashboardPath = "../dashboard.php";

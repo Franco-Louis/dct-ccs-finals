@@ -2,9 +2,11 @@
     ob_start(); // Start the output buffer
     session_start();
     $title = 'Detach Subject from Student';
+    $_SESSION['current_page'] = $_SERVER['REQUEST_URI'];
 
     require '../../functions.php';
-
+    guard(); 
+    
     // Paths
     $dashboardPath = "../dashboard.php";
     $logoutPath = "../logout.php";

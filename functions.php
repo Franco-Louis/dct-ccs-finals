@@ -116,6 +116,22 @@ function validateStudentData($student_id, $first_name, $last_name) {
     return $arrErrors;
 }
 
+function guard() {
+    if (!isset($_SESSION['email'])) {
+        header("Location: " . getBaseURL());
+    }
+}
+
+function getBaseURL() {
+    $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https://' : 'http://';
+    return $protocol . $_SERVER['HTTP_HOST'];
+}
+
+function checkUserSessionIsActive() {
+    if (isset($_SESSION['email']) && isset($_SESSION['current_page'])) {
+        header("Location: " . $_SESSION['current_page']);
+    }
+}
 function checkDuplicateStudentData($student_id) {
     $arrErrors = [];
     $con = dataBaseConnection();

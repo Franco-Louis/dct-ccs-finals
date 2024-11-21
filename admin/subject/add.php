@@ -1,10 +1,11 @@
 <?php
 session_start();
 ob_start();
+$_SESSION['current_page'] = $_SERVER['REQUEST_URI'];
 
 // Include the database connection function and sanitizeInput
 require_once '../../functions.php'; // Adjust the path to your functions file as needed
-
+guard();
 // Page-specific settings
 $title = 'Add Subject';
 

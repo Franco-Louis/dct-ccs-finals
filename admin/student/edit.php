@@ -2,8 +2,10 @@
     ob_start();
     session_start();
     $title = 'Edit Student';
+    $_SESSION['current_page'] = $_SERVER['REQUEST_URI'];
     
     require '../../functions.php';
+    guard();
 
     // Define navigation paths
     $pathDashboard = "../dashboard.php";

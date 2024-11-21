@@ -3,7 +3,10 @@ ob_start();
 session_start();
 
 $title = 'Delete Subject';
+
+$_SESSION['current_page'] = $_SERVER['REQUEST_URI'];
 require '../../functions.php';
+guard();
 
 $dashboardPath = "../dashboard.php";
 $logoutPath = "../logout.php";

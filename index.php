@@ -1,5 +1,9 @@
 <?php
+
+session_start();
+ob_start();
 require('functions.php');
+checkUserSessionIsActive();
 
 if (isset($_POST['login'])) {
    
