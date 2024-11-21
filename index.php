@@ -11,9 +11,6 @@ if (isset($_POST['login'])) {
     $password = sanitizeInput($_POST['password']);
     $errors = validateLoginCredentials($email, $password);
     
-    // Check login credentials
-    session_start(); // Ensure session is started
-
     if (checkLoginCredentials($email, $password)) {
         $_SESSION['email'] = $email;
         header("location: admin/dashboard.php");
