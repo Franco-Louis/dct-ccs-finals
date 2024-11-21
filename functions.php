@@ -98,33 +98,27 @@ function checkLoginCredentials($email, $password) {
 function validateStudentData($student_id, $first_name, $last_name) {
     $arrErrors = [];
 
-
     // Validate Student ID
     if (empty($student_id)) {
         $arrErrors[] = "Student ID is required.";
     }
-
 
     // Validate First Name
     if (empty($first_name)) {
         $arrErrors[] = "First name is required.";
     }
 
-
     // Validate Last Name
     if (empty($last_name)) {
         $arrErrors[] = "Last name is required.";
     }
 
-
     return $arrErrors;
 }
-
 
 function checkDuplicateStudentData($student_id) {
     $arrErrors = [];
     $con = dataBaseConnection();
-
 
     // Check if the student ID already exists in the database
     $stmt = $con->prepare("SELECT * FROM students WHERE student_id = ?");
@@ -137,14 +131,11 @@ function checkDuplicateStudentData($student_id) {
         $arrErrors[] = "Duplicate Student ID.";
     }
 
-
     $stmt->close();
     mysqli_close($con);
 
-
     return $arrErrors;
 }
-
 
 function getStudentData($student_id) {
     $con = dataBaseConnection();
@@ -156,10 +147,8 @@ function getStudentData($student_id) {
     $stmt->close();
     mysqli_close($con);
 
-
     return $student_data;
 }
-
 
 function getAllStudents() {
     $con = dataBaseConnection();
@@ -189,8 +178,7 @@ function validateSubjectData($subject_code, $subject_name) {
 
 function checkDuplicateSubjectData($subject_code, $subject_name) {
     $arrErrors = [];
-    $con = getDatabaseConnection();
-
+    $con = dataBaseConnection();
 
     $stmt = $con->prepare("SELECT * FROM subjects WHERE subject_code = ? OR subject_name = ?");
     $stmt->bind_param("ss", $subject_code, $subject_name);
@@ -202,18 +190,15 @@ function checkDuplicateSubjectData($subject_code, $subject_name) {
         $arrErrors[] = "Duplicate Subject Code or Subject Name.";
     }
 
-
     $stmt->close();
     mysqli_close($con);
-
 
     return $arrErrors;
 }
 
-
 function checkDuplicateSubjectDataForEdit($subject_code, $subject_name) {
     $arrErrors = [];
-    $con = getDatabaseConnection();
+    $con = dataBaseConnection();
 
     $stmt = $con->prepare("SELECT * FROM subjects WHERE subject_name = ? AND subject_code != ?");
     $stmt->bind_param("ss", $subject_name, $subject_code);
@@ -223,13 +208,11 @@ function checkDuplicateSubjectDataForEdit($subject_code, $subject_name) {
     if ($result->num_rows > 0) {
         $arrErrors[] = "Duplicate Subject Name.";
     }
-
     $stmt->close();
     mysqli_close($con);
 
     return $arrErrors;
 }    
-
 
 function validateAttachedSubject($subject_data) {
     $arrErrors = [];
@@ -241,9 +224,8 @@ function validateAttachedSubject($subject_data) {
     return $arrErrors;
 }    
 
-
 function getSubjects() {
-    $con = getDatabaseConnection();
+    $con = dataBaseConnection();
     $stmt = $con->prepare("SELECT * FROM subjects ORDER BY subject_code ASC");
     $stmt->execute();
     $result = $stmt->get_result();
@@ -251,13 +233,11 @@ function getSubjects() {
     $stmt->close();
     mysqli_close($con);
 
-
     return $subjects;
 }
 
-
 function getSubjectByCode($subject_code) {
-    $con = getDatabaseConnection();
+    $con = dataBaseConnection();
     $stmt = $con->prepare("SELECT * FROM subjects WHERE subject_code = ?");
     $stmt->bind_param("s", $subject_code);
     $stmt->execute();
@@ -269,9 +249,8 @@ function getSubjectByCode($subject_code) {
     return $subject; 
 }    
 
-
 function getSubjectCount() {
-    $con = getDatabaseConnection();
+    $con = dataBaseConnection();
     $stmt = $con->prepare("SELECT COUNT(*) AS subject_count FROM subjects");
     $stmt->execute();
     $result = $stmt->get_result();
@@ -282,9 +261,8 @@ function getSubjectCount() {
     return $data['subject_count'];
 }
 
-
 function addSubject($subject_code, $subject_name) {
-    $con = getDatabaseConnection();
+    $con = dataBaseConnection();
     $stmt = $con->prepare("INSERT INTO subjects (subject_code, subject_name) VALUES (?, ?)");
     $stmt->bind_param("ss", $subject_code, $subject_name);
     $stmt->execute();
@@ -292,9 +270,8 @@ function addSubject($subject_code, $subject_name) {
     mysqli_close($con);
 }
 
-
 function updateSubject($subject_code, $subject_name) {
-    $con = getDatabaseConnection();
+    $con = dataBaseConnection();
     $stmt = $con->prepare("UPDATE subjects SET subject_name = ? WHERE subject_code = ?");
     $stmt->bind_param("ss", $subject_name, $subject_code);
     $stmt->execute();
@@ -303,7 +280,7 @@ function updateSubject($subject_code, $subject_name) {
 }    
 
 function deleteSubjectByCode($subject_code) {
-    $con = getDatabaseConnection();
+    $con = dataBaseConnection();
 
     $stmt = $con->prepare("DELETE FROM students_subjects WHERE subject_id = ?");
     $stmt->bind_param("s", $subject_code);
@@ -330,6 +307,25 @@ function getStudentCount() {
     return $data['student_count'];
 }
 
+function validateGrade($grade) {
+    $arrErrors = [];
+
+    if(empty($grade)) {
+        $arrErrors[] = "Grade is Required";
+    } else if ($grade < 65 || $grade > 100) {
+        $arrErrors[] = "Grade must be between 65 and 100.";
+    }
+
+    return $arrErrors;
+}
+function handleGradeAssignment($student_id, $subject_id, $grade) {    
+    $con = dataBaseConnection();
+    $stmt = $con->prepare("UPDATE students_subjects SET grade = ? WHERE student_id = ? AND subject_id = ?");
+    $stmt->bind_param("dii", $grade, $student_id, $subject_id);
+    $stmt->execute();
+    $stmt->close();
+    mysqli_close($con);
+}    
 function registerStudent($student_id, $first_name, $last_name) {
     $con = dataBaseConnection();
     $stmt = $con->prepare("INSERT INTO students (student_id, first_name, last_name) VALUES (?, ?, ?)");
@@ -338,7 +334,6 @@ function registerStudent($student_id, $first_name, $last_name) {
     $stmt->close();
     mysqli_close($con);
 }
-
 
 function updateStudent($student_id, $first_name, $last_name) {
     $con = dataBaseConnection();
@@ -349,10 +344,8 @@ function updateStudent($student_id, $first_name, $last_name) {
     mysqli_close($con);
 }    
 
-
 function deleteStudentAndSubjects($student_id) {
     $con = dataBaseConnection();
-
 
     $stmt = $con->prepare("DELETE FROM students_subjects WHERE student_id = ?");
     $stmt->bind_param("i", $student_id);
@@ -367,16 +360,11 @@ function deleteStudentAndSubjects($student_id) {
     function getStudentSubjectDetails($student_id, $subject_id) {
         $con = dataBaseConnection();
     
-        $stmt = $con->prepare("SELECT students.student_id, 
-                                      students.first_name, 
-                                      students.last_name, 
-                                      subjects.subject_code, 
-                                      subjects.subject_name, 
-                                      students_subjects.grade
-                               FROM students
-                               JOIN students_subjects ON students.student_id = students_subjects.student_id
-                               JOIN subjects ON subjects.subject_code = students_subjects.subject_id
-                               WHERE students_subjects.student_id = ? AND students_subjects.subject_id = ?");
+        $stmt = $con->prepare("SELECT students.student_id, students.first_name, students.last_name, subjects.subject_code, subjects.subject_name, students_subjects.grade 
+        FROM students
+        JOIN students_subjects ON students.student_id = students_subjects.student_id
+        JOIN subjects ON subjects.subject_code = students_subjects.subject_id
+        WHERE students_subjects.student_id = ? AND students_subjects.subject_id = ?");
         $stmt->bind_param("ii", $student_id, $subject_id);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -392,7 +380,6 @@ function deleteStudentAndSubjects($student_id) {
     mysqli_close($con);
     return null;
 }    
-
     function getAttachedSubjects($student_id) {
         $attachedSubjects = [];
         $con = dataBaseConnection();
@@ -412,7 +399,6 @@ function deleteStudentAndSubjects($student_id) {
 
         return $attachedSubjects;
     }
-
     function getAvailableSubjects($student_id) {
         $availableSubjects = [];
         $con = databaseConnection();
@@ -426,7 +412,6 @@ function deleteStudentAndSubjects($student_id) {
         $stmt->close();
         mysqli_close($con);
 
-
         return $availableSubjects;
     }
 
@@ -437,10 +422,7 @@ function deleteStudentAndSubjects($student_id) {
         $stmt->execute();
         $stmt->close();
         mysqli_close($con);
-
     }
-
-
 
     function attachSubjectsToStudent($student_id, $subject_codes) {
         $con = databaseConnection();
@@ -451,7 +433,6 @@ function deleteStudentAndSubjects($student_id) {
             $subject_data = $stmt->get_result()->fetch_assoc();
             $stmt->close();
 
-
             if ($subject_data) {
                 $stmt = $con->prepare("INSERT INTO students_subjects (student_id, subject_id, grade) VALUES (?, ?, 0)");
                 $stmt->bind_param("ii", $student_id, $subject_code);
@@ -461,8 +442,4 @@ function deleteStudentAndSubjects($student_id) {
         }
         mysqli_close($con);
     }
-
-    
-
-
 ?>
